@@ -1,0 +1,72 @@
+-- Create database
+CREATE DATABASE restaurant_db;
+
+-- Connect to database
+\c restaurant_db
+
+-- Create bookings table
+CREATE TABLE bookings (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(100) NOT NULL,
+  phone VARCHAR(20) NOT NULL,
+  date DATE NOT NULL,
+  time TIME NOT NULL,
+  guests INT NOT NULL,
+  message TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create menu_items table
+CREATE TABLE menu_items (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  description TEXT,
+  price DECIMAL(10,2) NOT NULL,
+  category VARCHAR(50) NOT NULL,
+  popular BOOLEAN DEFAULT false
+);
+
+-- Create specials table
+CREATE TABLE specials (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(100) NOT NULL,
+  description TEXT,
+  discount VARCHAR(50) NOT NULL,
+  valid_until DATE,
+  image_url VARCHAR(255)
+);
+
+-- Create gallery table
+CREATE TABLE gallery (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(100) NOT NULL,
+  category VARCHAR(50) NOT NULL,
+  image_url VARCHAR(255) NOT NULL
+);
+
+-- Insert sample data
+INSERT INTO menu_items (name, description, price, category, popular) VALUES
+('Truffle Arancini', 'Risotto balls with black truffle', 12.95, 'appetizers', true),
+('Seared Scallops', 'With cauliflower puree and caviar', 16.50, 'appetizers', false),
+('Filet Mignon', '8oz grass-fed beef, truffle mashed potatoes', 34.95, 'main', true),
+('Wild Salmon', 'Pan-seared with lemon dill sauce', 26.75, 'main', false),
+('Chocolate Soufflé', 'With vanilla ice cream', 10.50, 'desserts', true),
+('Crème Brûlée', 'Classic vanilla bean', 9.25, 'desserts', false),
+('Signature Cocktail', 'House special with seasonal ingredients', 14.00, 'drinks', false),
+('Wine Flight', 'Three 3oz pours of selected wines', 18.50, 'drinks', true);
+
+INSERT INTO specials (title, description, discount, valid_until, image_url) VALUES
+('Weekend Brunch', 'Enjoy our signature brunch menu every Saturday & Sunday 10am-2pm', '15% OFF', '2025-12-31', '/brunch.jpg'),
+('Date Night Package', '3-course meal for two with wine pairing', '$99', '2025-11-30', '/date-night.jpg'),
+('Happy Hour', 'Half-price appetizers and $5 cocktails Mon-Fri 4-6pm', '50% OFF', '2025-12-31', '/happy-hour.jpg');
+
+INSERT INTO gallery (title, category, image_url) VALUES
+('Signature Dish', 'food', '/gallery/signature-dish.jpg'),
+('Dining Area', 'interior', '/gallery/dining-area.jpg'),
+('Dessert Selection', 'food', '/gallery/desserts.jpg'),
+('Wine Tasting', 'events', '/gallery/wine-tasting.jpg'),
+('Bar Lounge', 'interior', '/gallery/bar-lounge.jpg'),
+('Cooking Class', 'events', '/gallery/cooking-class.jpg'),
+('Chef Special', 'food', '/gallery/chef-special.jpg'),
+('Outdoor Patio', 'interior', '/gallery/patio.jpg');
