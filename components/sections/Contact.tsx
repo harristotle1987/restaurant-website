@@ -34,11 +34,30 @@ export default function Contact() {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  // Function to convert 12-hour time to 24-hour format
+  const convertTo24Hour = (time12h: string): string => {
+    const [time, modifier] = time12h.split(' ');
+    let [hours, minutes] = time.split(':');
+    
+    if (hours === '12') {
+      hours = '00';
+    }
+    
+    if (modifier === 'PM') {
+      hours = (parseInt(hours, 10) + 12).toString();
+    }
+    
+    return `${hours.padStart(2, '0')}:${minutes}`;
+  };
+
   const onSubmit = async (data: BookingFormData) => {
     setIsSubmitting(true);
     setSubmitError(null);
     
     try {
+      // Convert time to 24-hour format for backend
+      const time24h = convertTo24Hour(data.time);
+      
       const response = await fetch('/api/bookings', {
         method: 'POST',
         headers: { 
@@ -47,7 +66,8 @@ export default function Contact() {
         },
         body: JSON.stringify({
           ...data,
-          date: new Date(data.date).toISOString()
+          date: data.date, // Send date as YYYY-MM-DD string
+          time: time24h    // Send time in 24-hour format
         })
       });
 

@@ -50,8 +50,7 @@ const Specials = () => {
           'Accept': 'application/json'
         },
         body: JSON.stringify({
-          email: data.email,
-          subscribed_at: new Date().toISOString()
+          email: data.email
         })
       });
 
@@ -65,14 +64,29 @@ const Specials = () => {
       const responseData = await response.json();
 
       if (!response.ok) {
-        throw new Error(responseData.error || `Server error: ${response.status}`);
+        const error: any = new Error(responseData.error || `Server error: ${response.status}`);
+        error.statusCode = response.status;
+        throw error;
       }
 
       setSubmitSuccess(true);
       reset();
     } catch (error: any) {
       console.error('Subscription error:', error);
-      setSubmitError(error.message || 'Failed to subscribe. Please try again.');
+      
+      // User-friendly error messages
+      let userMessage = 'Failed to subscribe. Please try again.';
+      
+      if (error.message.includes('ECONNREFUSED') || 
+          error.message.includes('connection refused')) {
+        userMessage = 'Our subscription service is currently unavailable. Please try again later.';
+      } else if (error.message.includes('authentication failed')) {
+        userMessage = 'Service configuration issue. We\'re working on it!';
+      } else if (error.statusCode === 409) {
+        userMessage = 'This email is already subscribed.';
+      }
+      
+      setSubmitError(userMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -160,7 +174,7 @@ const Specials = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.1 }}
+              transition={{ duration: 0.3 }}
             >
               <p>Thank you for subscribing! Check your email for confirmation.</p>
             </motion.div>
