@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { executeQuery } from '../../lib/db';
+import { prisma } from '../../lib/db';
 
 interface BookingData {
   name: string;
@@ -18,187 +18,140 @@ const validateDate = (dateString: string): boolean => {
     return false;
   }
 
-  const date = new Date(dateString + 'T00:00:00.000Z');
-  const parts = dateString.split('-');
-  const year = parseInt(parts[0], 10);
-  const month = parseInt(parts[1], 10);
-  const day = parseInt(parts[2], 10);
-
-  return (
-    date.getUTCFullYear() === year &&
-    date.getUTCMonth() === month - 1 &&
-    date.getUTCDate() === day &&
-    !isNaN(date.getTime())
-  );
+  const date = new Date(dateString);
+  return date instanceof Date && !isNaN(date.getTime());
 };
 
-// Function to validate time format
+// Function to validate time format (HH:MM in 24-hour format)
 const validateTime = (timeString: string): boolean => {
   const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
   return timeRegex.test(timeString);
 };
 
+// Function to validate email format
+const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+// Function to validate phone number (optional)
+const validatePhone = (phone?: string): boolean => {
+  if (!phone) return true; // Phone is optional
+  const phoneRegex = /^\+?[\d\s-]{10,}$/;
+  return phoneRegex.test(phone);
+};
+
+interface DatabaseError extends Error {
+  code?: string;
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', ['POST']);
-    return res.status(405).json({
-      error: 'Method not allowed',
-      allowedMethods: ['POST'],
-    });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    const bookingData = req.body as Partial<BookingData>;
+    const {
+      name,
+      email,
+      phone,
+      date,
+      time,
+      guests,
+      message
+    } = req.body as BookingData;
 
-    // Basic structure validation
-    if (typeof bookingData !== 'object' || !bookingData) {
-      return res.status(400).json({ error: 'Invalid request body format' });
-    }
-
-    const requiredFields: (keyof BookingData)[] = ['name', 'email', 'date', 'time', 'guests'];
-    const missingFields = requiredFields.filter((field) => !bookingData[field]);
-
-    if (missingFields.length > 0) {
+    // Input validation
+    if (!name || !email || !date || !time || !guests) {
       return res.status(400).json({
-        error: `Missing required fields: ${missingFields.join(', ')}`,
-        requiredFields,
+        error: "Missing required fields",
+        details: { name, email, date, time, guests }
       });
     }
 
-    const { name, email, phone, date, time, guests, message } = bookingData;
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email!)) {
-      return res.status(400).json({
-        error: 'Invalid email format',
-        details: 'Please provide a valid email address',
-      });
+    if (!validateEmail(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
     }
 
-    if (!validateDate(date!)) {
-      return res.status(400).json({
-        error: 'Invalid date format',
-        details: 'Please use YYYY-MM-DD format with a valid date',
-      });
+    if (!validateDate(date)) {
+      return res.status(400).json({ error: "Invalid date format. Use YYYY-MM-DD" });
     }
 
-    if (!validateTime(time!)) {
-      return res.status(400).json({
-        error: 'Invalid time format',
-        details: 'Please use HH:MM format (24-hour)',
-      });
+    if (!validateTime(time)) {
+      return res.status(400).json({ error: "Invalid time format. Use HH:MM (24-hour)" });
     }
 
-    if (typeof guests !== 'number' || guests < 1 || guests > 20) {
-      return res.status(400).json({
-        error: 'Invalid party size',
-        details: 'Party size must be between 1 and 20',
-      });
+    if (!validatePhone(phone)) {
+      return res.status(400).json({ error: "Invalid phone number format" });
     }
 
-    // Validate date is not in the past
-    const bookingDate = new Date(date! + 'T00:00:00.000Z');
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    if (bookingDate < today) {
-      return res.status(400).json({
-        error: 'Invalid booking date',
-        details: 'Cannot book for past dates',
-      });
+    if (typeof guests !== "number" || guests < 1 || guests > 20) {
+      return res.status(400).json({ error: "Invalid number of guests (1-20)" });
     }
 
-    // Test database connection
-    if (!pool) {
-      return res.status(503).json({
-        error: 'Database connection not available',
-      });
-    }
-    await pool.query('SELECT 1');
-
-    // Insert booking into database
-    const result = await pool.query(
-      `INSERT INTO bookings (
-        customer_name,
-        customer_email,
-        customer_phone,
-        booking_date,
-        booking_time,
-        party_size,
-        special_requests,
-        status,
-        created_at,
-        updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-      RETURNING id, booking_date, booking_time`,
-      [
+    // Create booking in database
+    const booking = await prisma.booking.create({
+      data: {
         name,
         email,
-        phone || null,
-        date,
+        phone,
+        date: new Date(date),
         time,
         guests,
-        message || null,
-        'pending',
-        new Date(),
-        new Date(),
-      ]
-    );
-
-    const booking = result.rows[0];
+        message: message || null
+      }
+    });
 
     return res.status(201).json({
       success: true,
-      message: 'Booking created successfully',
-      bookingId: booking.id,
-      bookingDetails: {
-        date: booking.booking_date,
-        time: booking.booking_time,
-      },
+      booking: {
+        id: booking.id,
+        name: booking.name,
+        date: booking.date,
+        time: booking.time,
+        guests: booking.guests
+      }
     });
 
   } catch (error) {
-    console.error('Booking API error:', error);
+    console.error("Booking API error:", error);
     
     let statusCode = 500;
-    let errorMessage = 'Internal server error';
-
-    interface DatabaseError extends Error {
-      code?: string;
-    }
-
-    const dbError = error as DatabaseError;
-
-    if (dbError.code === '23505') {
-      statusCode = 409;
-      errorMessage = 'Booking conflict - this time slot may already be taken';
-    } else if (dbError.code === '23502') {
-      statusCode = 400;
-      errorMessage = 'Missing required database field';
-    } else if (dbError.code === '22008' || dbError.code === '22007') {
-      statusCode = 400;
-      errorMessage = 'Invalid date or time format';
-    } else if (dbError.code === 'ECONNREFUSED' || dbError.code === 'ETIMEDOUT') {
-      statusCode = 503;
-      errorMessage = 'Database connection failed';
+    let errorMessage = "Internal server error";
+    
+    if (error instanceof Error) {
+      const dbError = error as DatabaseError;
+      
+      switch(dbError.code) {
+        case "23505":
+          statusCode = 409;
+          errorMessage = "Booking conflict - this time slot may already be taken";
+          break;
+        case "23502":
+          statusCode = 400;
+          errorMessage = "Missing required database field";
+          break;
+        case "22008":
+        case "22007":
+          statusCode = 400;
+          errorMessage = "Invalid date or time format";
+          break;
+        case "ECONNREFUSED":
+        case "ETIMEDOUT":
+          statusCode = 503;
+          errorMessage = "Database connection failed";
+          break;
+      }
     }
 
     return res.status(statusCode).json({
       error: errorMessage,
-      details: process.env.NODE_ENV === 'development' ? dbError.message : undefined,
+      details: process.env.NODE_ENV === "development" ? 
+        (error instanceof Error ? error.message : "Unknown error") : 
+        undefined
     });
   }
 }
