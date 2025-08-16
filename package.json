@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "init-db": "ts-node scripts/init-db.ts",
-    "vercel-build": "next build"
+    "vercel-build": "prisma generate && next build"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",

@@ -2,7 +2,8 @@
 const nextConfig = {
   // Basic image configuration
   images: {
-    domains: ['localhost'],
+    domains: ['localhost', 'vercel.app', 'your-domain.com'],
+    unoptimized: process.env.NODE_ENV === 'development',
   },
   
   // Only add experimental config in development
