@@ -17,7 +17,7 @@ const validateDate = (dateString: string): boolean => {
   if (!dateRegex.test(dateString)) {
     return false;
   }
-  
+
   const date = new Date(dateString + 'T00:00:00.000Z');
   const parts = dateString.split('-');
   const year = parseInt(parts[0], 10);
@@ -63,7 +63,7 @@ export default async function handler(
 
   if (req.method !== "POST") {
     res.setHeader('Allow', ['POST']);
-    return res.status(405).json({ 
+    return res.status(405).json({
       error: "Method not allowed",
       allowedMethods: ['POST']
     });
@@ -89,28 +89,28 @@ export default async function handler(
     }
 
     if (!validateEmail(email)) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: "Invalid email format",
         details: "Please provide a valid email address"
       });
     }
 
     if (!validateDate(date)) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: "Invalid date format",
         details: "Please use YYYY-MM-DD format with a valid date"
       });
     }
 
     if (!validateTime(time)) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: "Invalid time format",
         details: "Please use HH:MM format (24-hour)"
       });
     }
 
     if (typeof guests !== "number" || guests < 1 || guests > 20) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: "Invalid party size",
         details: "Party size must be between 1 and 20"
       });
@@ -120,7 +120,7 @@ export default async function handler(
     const bookingDate = new Date(date + 'T00:00:00.000Z');
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     if (bookingDate < today) {
       return res.status(400).json({
         error: 'Invalid booking date',
@@ -155,14 +155,14 @@ export default async function handler(
 
   } catch (error) {
     console.error("Booking API error:", error);
-    
+
     let statusCode = 500;
-    let errorMessage = error instanceof Error ? error.message : "Internal server error";
-    
+    let errorMessage = "Internal server error";
+
     if (error instanceof Error) {
       const dbError = error as DatabaseError;
-      
-      switch(dbError.code) {
+
+      switch (dbError.code) {
         case "P2002": // Prisma unique constraint violation
           statusCode = 409;
           errorMessage = "Booking conflict - this time slot may already be taken";
@@ -194,19 +194,23 @@ export default async function handler(
           errorMessage = "Database connection failed";
           break;
         default:
-          // Check if it's a Prisma error
-          if (dbError.message?.includes('Prisma')) {
+          if (dbError.message?.includes("Prisma")) {
             statusCode = 500;
             errorMessage = "Database operation failed";
+          } else {
+            errorMessage = dbError.message;
           }
       }
     }
 
     return res.status(statusCode).json({
       error: errorMessage,
-      details: process.env.NODE_ENV === "development" ? 
-        (error instanceof Error ? error.message : "Unknown error") : 
-        undefined
+      details:
+        process.env.NODE_ENV === "development"
+          ? error instanceof Error
+            ? error.message
+            : "Unknown error"
+          : undefined,
     });
   }
 }
