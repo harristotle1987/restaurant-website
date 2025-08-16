@@ -37,7 +37,7 @@ export default function Contact() {
   // Function to convert 12-hour time to 24-hour format
   const convertTo24Hour = (time12h: string): string => {
     const [time, modifier] = time12h.split(' ');
-    let [hours, minutes] = time.split(':');
+    const [hours, minutes] = time.split(':');
     
     if (hours === '12') {
       hours = '00';
@@ -86,9 +86,13 @@ export default function Contact() {
 
       setSubmitSuccess(true);
       reset();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Booking error:', error);
-      setSubmitError(error.message || 'Failed to submit booking. Please try again.');
+      setSubmitError(
+        error instanceof Error 
+          ? error.message 
+          : 'Failed to submit booking. Please try again.'
+      );
     } finally {
       setIsSubmitting(false);
     }

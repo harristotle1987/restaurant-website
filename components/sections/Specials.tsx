@@ -64,15 +64,19 @@ const Specials = () => {
       const responseData = await response.json();
 
       if (!response.ok) {
-        const error: any = new Error(responseData.error || `Server error: ${response.status}`);
+        interface ResponseError extends Error {
+          statusCode?: number;
+        }
+        const error = new Error(responseData.error || `Server error: ${response.status}`) as ResponseError;
         error.statusCode = response.status;
         throw error;
       }
 
       setSubmitSuccess(true);
       reset();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Subscription error:', error);
+      const err = error as Error;
       
       // User-friendly error messages
       let userMessage = 'Failed to subscribe. Please try again.';

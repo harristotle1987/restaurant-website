@@ -60,9 +60,9 @@ export async function POST(request: Request) {
     
   } catch (error) {
     console.error('Database error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Database operation failed';
+    const message = error instanceof Error ? error.message : 'Database operation failed';
     return NextResponse.json(
-      { error: error.message || 'Database operation failed' },
+      { error: message },
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }

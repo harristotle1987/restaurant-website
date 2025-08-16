@@ -170,8 +170,9 @@ export default async function handler(
       },
     });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Booking API error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'An error occurred';
 
     let statusCode = 500;
     let errorMessage = 'Internal server error';

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+
 import { FiMenu, FiX } from 'react-icons/fi';
 
 export default function Navbar() {

@@ -4,7 +4,7 @@ import Specials from '../../components/sections/Specials';
 import Gallery from '../../components/sections/Gallery';
 import Contact from '../../components/sections/Contact';
 import Navbar from '../../components/layout/Navbar';
-import Footer from '../../components/layout/Footer';
+
 import type { Metadata } from 'next';
 import './globals.css';
 
