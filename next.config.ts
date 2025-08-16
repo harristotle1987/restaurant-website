@@ -4,6 +4,12 @@ const nextConfig = {
   images: {
     domains: ['localhost', 'vercel.app', 'your-domain.com'],
     unoptimized: process.env.NODE_ENV === 'development',
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
   },
   
   // Only add experimental config in development

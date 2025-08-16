@@ -142,7 +142,7 @@ const Specials = () => {
               transition={{ duration: 0.3 }}
             >
               <div className="relative h-56 overflow-hidden">
-                <img 
+                <Image
                   src={special.image}
                   alt={special.title}
                   className="w-full h-full object-cover"

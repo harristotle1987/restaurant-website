@@ -60,7 +60,7 @@ export async function GET() {
     
   } catch (error) {
     // Detailed error logging
-    const err = error instanceof Error ? error : new Error('Unknown error');
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('API Error Details:', {
       message: error.message,
       code: error.code,

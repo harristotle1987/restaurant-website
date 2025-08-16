@@ -276,9 +276,9 @@ const About = () => {
             </div>
             <h3 className="text-3xl font-serif font-bold mb-6">Our Culinary Philosophy</h3>
             <p className="text-xl text-amber-100 leading-relaxed mb-8 italic">
-              "              &ldquo;We believe that extraordinary dining experiences come from the perfect harmony of fresh ingredients, 
+              "              &ldquo;              &ldquo;We believe that extraordinary dining experiences come from the perfect harmony of fresh ingredients, 
               skilled craftsmanship, and heartfelt hospitality. Each dish tells a story of passion, tradition, 
-              and innovation.&rdquo;"
+              and innovation.&rdquo;&rdquo;"
             </p>
             <div className="flex justify-center">
               <a 
