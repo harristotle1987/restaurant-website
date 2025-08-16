@@ -60,21 +60,23 @@ export async function GET() {
     
   } catch (error: unknown) {
     // Detailed error logging
-    console.error('Menu API error:', error);
-    const responseMessage = error instanceof Error ? error.message : 'Internal server error';
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error(errorMessage);
+    console.error('API Error Details:', {
+      error: errorMessage,
+      dbConfig: {
+        user: process.env.DB_USER,
+        host: process.env.DB_HOST,
+        database: process.env.DB_NAME,
+        port: process.env.DB_PORT,
+      }
+    });
     
     return NextResponse.json(
       { 
         error: "Database operation failed",
-        message: responseMessage,
-        suggestion: "Check database connection and table existence",
-        details: process.env.NODE_ENV === 'development' ? {
-          dbConfig: {
-            host: process.env.DB_HOST,
-            database: process.env.DB_NAME,
-            port: process.env.DB_PORT
-          }
-        } : undefined
+        message: error instanceof Error ? error.message : "Unknown error occurred",
+        suggestion: "Check database connection and table existence"
       },
       { status: 500 }
     );
