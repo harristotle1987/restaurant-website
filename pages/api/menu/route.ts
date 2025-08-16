@@ -58,13 +58,12 @@ export async function GET() {
     
     return NextResponse.json(result.rows);
     
-  } catch (error) {
+  } catch (error: unknown) {
     // Detailed error logging
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error(errorMessage);
     console.error('API Error Details:', {
-      message: error.message,
-      code: error.code,
-      stack: error.stack,
+      error: errorMessage,
       dbConfig: {
         user: process.env.DB_USER,
         host: process.env.DB_HOST,
@@ -76,7 +75,7 @@ export async function GET() {
     return NextResponse.json(
       { 
         error: "Database operation failed",
-        message: error.message,
+        message: error instanceof Error ? error.message : "Unknown error occurred",
         suggestion: "Check database connection and table existence"
       },
       { status: 500 }

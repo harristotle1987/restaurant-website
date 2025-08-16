@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -76,18 +77,18 @@ const Specials = () => {
       reset();
     } catch (error) {
       console.error('Subscription error:', error);
-      const err = error as Error;
-      
       // User-friendly error messages
       let userMessage = 'Failed to subscribe. Please try again.';
       
-      if (error.message.includes('ECONNREFUSED') || 
-          error.message.includes('connection refused')) {
-        userMessage = 'Our subscription service is currently unavailable. Please try again later.';
-      } else if (error.message.includes('authentication failed')) {
-        userMessage = 'Service configuration issue. We\'re working on it!';
-      } else if (error.statusCode === 409) {
-        userMessage = 'This email is already subscribed.';
+      if (error instanceof Error) {
+        if (error.message.includes('ECONNREFUSED') || 
+            error.message.includes('connection refused')) {
+          userMessage = 'Our subscription service is currently unavailable. Please try again later.';
+        } else if (error.message.includes('authentication failed')) {
+          userMessage = 'Service configuration issue. We&apos;re working on it!';
+        } else if ('statusCode' in error && error.statusCode === 409) {
+          userMessage = 'This email is already subscribed.';
+        }
       }
       
       setSubmitError(userMessage);

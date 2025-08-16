@@ -164,10 +164,10 @@ const Menu = () => {
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <div>
-              <h3 className="text-3xl font-serif font-bold text-amber-300 mb-6">Chef's Special</h3>
+              <h3 className="text-3xl font-serif font-bold text-amber-300 mb-6">Chef&apos;s Special</h3>
               <p className="text-amber-100 text-lg mb-6 leading-relaxed">
-                This week's exclusive creation features locally sourced ingredients with a modern twist. 
-                Ask your server about today's special preparation.
+                This week&apos;s exclusive creation features locally sourced ingredients with a modern twist. 
+                Ask your server about today&apos;s special preparation.
               </p>
               <div className="flex items-center">
                 <div className="bg-amber-600 rounded-full p-2 mr-4">
@@ -186,7 +186,7 @@ const Menu = () => {
               <div className="absolute inset-0 bg-[url('/images/menu-special.jpg')] bg-cover bg-center"></div>
               <div className="absolute bottom-0 left-0 p-6 z-20">
                 <span className="text-amber-300 font-bold">$32.95</span>
-                <h4 className="text-xl font-bold text-white">Today's Special</h4>
+                <h4 className="text-xl font-bold text-white">Today&apos;s Special</h4>
               </div>
             </div>
           </div>

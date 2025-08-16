@@ -38,15 +38,17 @@ export default function Contact() {
   const convertTo24Hour = (time12h: string): string => {
     const [time, modifier] = time12h.split(' ');
     const [hours, minutes] = time.split(':');
+    let hoursNum = hours;
     
-    if (hours === '12') {
-      hours = '00';
+    if (hoursNum === '12') {
+      hoursNum = '00';
     }
     
     if (modifier === 'PM') {
-      hours = (parseInt(hours, 10) + 12).toString();
+      hoursNum = (parseInt(hoursNum, 10) + 12).toString();
     }
     
+    return `${hoursNum.padStart(2, '0')}:${minutes}`;
     return `${hours.padStart(2, '0')}:${minutes}`;
   };
 
@@ -205,7 +207,7 @@ export default function Contact() {
                 </div>
                 <h3 className="text-2xl font-serif font-bold text-amber-300 mb-2">Reservation Confirmed!</h3>
                 <p className="text-amber-100 mb-6">
-                  Thank you for your booking. We've sent a confirmation to your email.
+                  Thank you for your booking. We&apos;ve sent a confirmation to your email.
                 </p>
                 <motion.button 
                   onClick={() => setSubmitSuccess(false)}

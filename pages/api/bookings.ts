@@ -4,11 +4,9 @@ import { prisma } from '../../lib/db';
 interface BookingData {
   name: string;
   email: string;
-  phone?: string;
   date: string;
   time: string;
   guests: number;
-  message?: string;
 }
 
 // Function to validate date format and value
@@ -34,13 +32,6 @@ const validateEmail = (email: string): boolean => {
   return emailRegex.test(email);
 };
 
-// Function to validate phone number (optional)
-const validatePhone = (phone?: string): boolean => {
-  if (!phone) return true; // Phone is optional
-  const phoneRegex = /^\+?[\d\s-]{10,}$/;
-  return phoneRegex.test(phone);
-};
-
 interface DatabaseError extends Error {
   code?: string;
 }
@@ -57,11 +48,9 @@ export default async function handler(
     const {
       name,
       email,
-      phone,
       date,
       time,
-      guests,
-      message
+      guests
     } = req.body as BookingData;
 
     // Input validation
@@ -84,10 +73,6 @@ export default async function handler(
       return res.status(400).json({ error: "Invalid time format. Use HH:MM (24-hour)" });
     }
 
-    if (!validatePhone(phone)) {
-      return res.status(400).json({ error: "Invalid phone number format" });
-    }
-
     if (typeof guests !== "number" || guests < 1 || guests > 20) {
       return res.status(400).json({ error: "Invalid number of guests (1-20)" });
     }
@@ -97,11 +82,9 @@ export default async function handler(
       data: {
         name,
         email,
-        phone,
         date: new Date(date),
         time,
-        guests,
-        message: message || null
+        guests
       }
     });
 

@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import About from '../../components/sections/About';
 import Menu from '../../components/sections/Menu';
 import Specials from '../../components/sections/Specials';
@@ -32,10 +33,12 @@ export default function Home() {
           </video>
           
           {/* Fallback Image */}
-          <img 
+          <Image 
             src="/images/hero-bg.jpg" 
             alt="Restaurant ambiance"
             className="w-full h-full object-cover md:hidden"
+            width={1920}
+            height={1080}
           />
           
           {/* Gradient Overlay */}
