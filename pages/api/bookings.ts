@@ -120,7 +120,7 @@ export default async function handler(
     console.error("Booking API error:", error);
     
     let statusCode = 500;
-    let errorMessage = "Internal server error";
+    let customErrorMessage = "Internal server error"; // Renamed variable
     
     if (error instanceof Error) {
       const dbError = error as DatabaseError;
@@ -128,27 +128,27 @@ export default async function handler(
       switch(dbError.code) {
         case "23505":
           statusCode = 409;
-          errorMessage = "Booking conflict - this time slot may already be taken";
+          customErrorMessage = "Booking conflict - this time slot may already be taken";
           break;
         case "23502":
           statusCode = 400;
-          errorMessage = "Missing required database field";
+          customErrorMessage = "Missing required database field";
           break;
         case "22008":
         case "22007":
           statusCode = 400;
-          errorMessage = "Invalid date or time format";
+          customErrorMessage = "Invalid date or time format";
           break;
         case "ECONNREFUSED":
         case "ETIMEDOUT":
           statusCode = 503;
-          errorMessage = "Database connection failed";
+          customErrorMessage = "Database connection failed";
           break;
       }
     }
 
     return res.status(statusCode).json({
-      error: errorMessage,
+      error: customErrorMessage, // Updated reference
       details: process.env.NODE_ENV === "development" ? 
         (error instanceof Error ? error.message : "Unknown error") : 
         undefined
