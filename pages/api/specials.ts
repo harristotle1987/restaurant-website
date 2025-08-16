@@ -39,8 +39,9 @@ export default async function handler(
     } finally {
       client.release();
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Database error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     
     return res.status(500).json(
       { error: 'Failed to fetch specials' }

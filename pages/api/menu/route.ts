@@ -58,8 +58,9 @@ export async function GET() {
     
     return NextResponse.json(result.rows);
     
-  } catch (error: any) {
+  } catch (error) {
     // Detailed error logging
+    const err = error instanceof Error ? error : new Error('Unknown error');
     console.error('API Error Details:', {
       message: error.message,
       code: error.code,

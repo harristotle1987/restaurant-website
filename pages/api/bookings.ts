@@ -1,5 +1,5 @@
-import { prisma } from '../../lib/db';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { executeQuery } from '../../lib/db';
 
 interface BookingData {
   name: string;
