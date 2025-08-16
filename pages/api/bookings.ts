@@ -172,28 +172,33 @@ export default async function handler(
 
   } catch (error) {
     console.error('Booking API error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'An error occurred';
-
+    
     let statusCode = 500;
     let errorMessage = 'Internal server error';
 
-    if (error.code === '23505') {
+    interface DatabaseError extends Error {
+      code?: string;
+    }
+
+    const dbError = error as DatabaseError;
+
+    if (dbError.code === '23505') {
       statusCode = 409;
       errorMessage = 'Booking conflict - this time slot may already be taken';
-    } else if (error.code === '23502') {
+    } else if (dbError.code === '23502') {
       statusCode = 400;
       errorMessage = 'Missing required database field';
-    } else if (error.code === '22008' || error.code === '22007') {
+    } else if (dbError.code === '22008' || dbError.code === '22007') {
       statusCode = 400;
       errorMessage = 'Invalid date or time format';
-    } else if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+    } else if (dbError.code === 'ECONNREFUSED' || dbError.code === 'ETIMEDOUT') {
       statusCode = 503;
       errorMessage = 'Database connection failed';
     }
 
     return res.status(statusCode).json({
       error: errorMessage,
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      details: process.env.NODE_ENV === 'development' ? dbError.message : undefined,
     });
   }
 }
