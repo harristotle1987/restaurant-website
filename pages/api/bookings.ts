@@ -157,54 +157,53 @@ export default async function handler(
     console.error("Booking API error:", error);
 
     let statusCode = 500;
-    let errorMessage = "Internal server error";
+    const dbError = error as DatabaseError;
+    let responseMessage = "Internal server error";
 
     if (error instanceof Error) {
-      const dbError = error as DatabaseError;
-
       switch (dbError.code) {
         case "P2002": // Prisma unique constraint violation
           statusCode = 409;
-          errorMessage = "Booking conflict - this time slot may already be taken";
+          responseMessage = "Booking conflict - this time slot may already be taken";
           break;
         case "P2003": // Foreign key constraint failed
           statusCode = 400;
-          errorMessage = "Invalid reference data";
+          responseMessage = "Invalid reference data";
           break;
         case "P2025": // Record not found
           statusCode = 404;
-          errorMessage = "Record not found";
+          responseMessage = "Record not found";
           break;
         case "23505": // PostgreSQL unique violation
           statusCode = 409;
-          errorMessage = "Booking conflict - this time slot may already be taken";
+          responseMessage = "Booking conflict - this time slot may already be taken";
           break;
         case "23502": // PostgreSQL not null violation
           statusCode = 400;
-          errorMessage = "Missing required database field";
+          responseMessage = "Missing required database field";
           break;
         case "22008":
         case "22007": // PostgreSQL datetime format error
           statusCode = 400;
-          errorMessage = "Invalid date or time format";
+          responseMessage = "Invalid date or time format";
           break;
         case "ECONNREFUSED":
         case "ETIMEDOUT":
           statusCode = 503;
-          errorMessage = "Database connection failed";
+          responseMessage = "Database connection failed";
           break;
         default:
           if (dbError.message?.includes("Prisma")) {
             statusCode = 500;
-            errorMessage = "Database operation failed";
+            responseMessage = "Database operation failed";
           } else {
-            errorMessage = dbError.message;
+            responseMessage = error.message;
           }
       }
     }
 
     return res.status(statusCode).json({
-      error: errorMessage,
+      error: responseMessage,
       details:
         process.env.NODE_ENV === "development"
           ? error instanceof Error
