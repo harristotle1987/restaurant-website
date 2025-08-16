@@ -1,4 +1,4 @@
-import { pool } from '../../lib/db';
+import { prisma } from '../../lib/db';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 interface BookingData {
