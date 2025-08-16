@@ -157,7 +157,7 @@ export default async function handler(
     console.error("Booking API error:", error);
     
     let statusCode = 500;
-    let errorMessage = "Internal server error"; // Single declaration
+    let errorMessage = error instanceof Error ? error.message : "Internal server error";
     
     if (error instanceof Error) {
       const dbError = error as DatabaseError;

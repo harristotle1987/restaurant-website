@@ -1,9 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Basic image configuration
   images: {
-    domains: ['localhost', 'vercel.app', 'your-domain.com'],
-    unoptimized: process.env.NODE_ENV === 'development',
     remotePatterns: [
       {
         protocol: 'https',
@@ -11,13 +8,13 @@ const nextConfig = {
       },
     ],
   },
-  
-  // Only add experimental config in development
-  ...(process.env.NODE_ENV === 'development' && {
-    experimental: {
-      allowedDevOrigins: ['192.168.160.114'],
-    },
-  }),
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+  eslint: {
+    ignoreDuringBuilds: false,
+  },
+  swcMinify: true,
   
   // Basic CORS headers for development
   async headers() {
