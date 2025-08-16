@@ -1,44 +1,39 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Make sure your schema.prisma file looks exactly like this:
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-// Define your models here
-model Menu {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String?
-  price       Float
-  category    String
-  image       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model Subscriber {
+  id             Int       @id @default(autoincrement())
+  email          String    @unique
+  isActive       Boolean   @default(true) @map("is_active")
+  subscribedAt   DateTime  @default(now()) @map("subscribed_at")
+  unsubscribedAt DateTime? @map("unsubscribed_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  @@map("subscribers")
 }
 
 model Booking {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String
-  date      DateTime
-  time      String
-  guests    Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
+  id              Int      @id @default(autoincrement())
+  customerName    String   @map("customer_name")
+  customerEmail   String   @map("customer_email")
+  customerPhone   String?  @map("customer_phone")
+  bookingDate     DateTime @map("booking_date") @db.Date
+  bookingTime     String   @map("booking_time")
+  partySize       Int      @map("party_size")
+  specialRequests String?  @map("special_requests")
+  status          String   @default("pending")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
-model Special {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String
-  image       String?
-  price       Float?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  @@map("bookings")
 }
