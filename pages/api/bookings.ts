@@ -236,6 +236,7 @@ export default applyRateLimit(async function handler(
     let statusCode = 500;
     let responseMessage = "Internal server error";
 
+    // FIXED ERROR: Single variable declaration with proper scoping
     if (dbError.code) {
       switch (dbError.code) {
         case "P2002": // Prisma unique constraint
