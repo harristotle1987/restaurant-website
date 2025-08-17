@@ -84,6 +84,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
     })
 
+    console.log("✅ New booking created:", {
+      id: newBooking.id,
+      email: newBooking.customerEmail,
+      date: newBooking.bookingDate.toISOString().split("T")[0],
+      time: newBooking.bookingTime,
+    })
+
     return res.status(201).json({
       success: true,
       bookingId: newBooking.id,
@@ -109,7 +116,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       })
     }
 
-    // ✅ FIXED: Single variable declaration only
+    // ✅ FIXED: Only ONE variable declaration
     const dbError = error as DatabaseError
     let statusCode = 500
     let responseMessage = "Internal server error"
