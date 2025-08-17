@@ -21,9 +21,7 @@ const applyRateLimit = (handler: NextApiHandler) => (
   return new Promise<void>((resolve, reject) => {
     limiter(req as any, res as any, (err: unknown) => {
       if (err) return reject(err);
-      Promise.resolve(handler(req, res))
-        .then(() => resolve())
-        .catch(reject);
+      Promise.resolve(handler(req, res)).then(() => resolve()).catch(reject);
     });
   });
 };
