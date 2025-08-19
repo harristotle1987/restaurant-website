@@ -17,19 +17,16 @@ async function testDatabaseConnection() {
     // Test table access (if they exist)
     try {
       console.log('\nChecking existing tables...');
-      const menu = await prisma.menu.findFirst();
-      console.log('✅ Menu table accessible:', menu ? 'Has records' : 'Empty table');
-    } catch (e) {
-      console.log('ℹ️ Menu table not yet created');
-    }
 
-    try {
-      const bookings = await prisma.booking.findFirst();
-      console.log('✅ Bookings table accessible:', bookings ? 'Has records' : 'Empty table');
-    } catch (e) {
-      console.log('ℹ️ Bookings table not yet created');
-    }
+      // Use Prisma model methods directly now that client is generated from schema
+      const menuRecord = await prisma.menu.findFirst();
+      console.log('✅ Menu table accessible (via model):', menuRecord ? 'Has records' : 'Empty table');
 
+      const bookingRecord = await prisma.booking.findFirst();
+      console.log('✅ Bookings table accessible (via model):', bookingRecord ? 'Has records' : 'Empty table');
+    } catch (e) {
+      console.log('ℹ️ Menu or bookings table may not be created yet:', e);
+    }
   } catch (error) {
     console.error('❌ Database test failed:', error);
     process.exit(1);
