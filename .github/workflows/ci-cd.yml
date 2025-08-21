@@ -34,7 +34,10 @@ jobs:
       run: npm run build
 
     - name: Run ESLint
-      run: npm run lint
+      run: |
+        # Run ESLint directly only on TypeScript sources so @typescript-eslint/parser
+        # doesn't attempt to load JS files that aren't part of the TS project.
+        npx eslint "src/**/*.{ts,tsx}" "pages/**/*.{ts,tsx}" "components/**/*.{ts,tsx}" --ext .ts,.tsx
 
     - name: Cache build output
       uses: actions/cache@v4
