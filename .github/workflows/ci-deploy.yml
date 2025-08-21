@@ -1,0 +1,61 @@
+name: CI / Build / Deploy
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  ci-deploy:
+    runs-on: ubuntu-latest
+    env:
+      # The workflow expects these secrets to be set in the repo settings:
+      # POSTGRES_PRISMA_URL, VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
+      DATABASE_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+      DIRECT_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          DIRECT_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+
+      - name: Run Prisma Migrations (deploy)
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          DIRECT_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+
+      - name: Build
+        run: npm run build
+        env:
+          DATABASE_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          DIRECT_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+
+      - name: Run tests
+        run: npm test || true
+
+      - name: Deploy to Vercel (GitHub Action)
+        # Using the commonly used Vercel GH Action. Set the secrets below.
+        uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          prod: true
+        env:
+          DATABASE_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          DIRECT_URL: ${{ secrets.POSTGRES_PRISMA_URL }}

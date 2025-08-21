@@ -48,4 +48,4 @@ node_modules/
 .env.test
 .env.production
 .DS_Store
-*.log
+*.log.env
