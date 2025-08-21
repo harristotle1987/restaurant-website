@@ -4,6 +4,7 @@ import { z } from "zod";
 import DOMPurify from "isomorphic-dompurify";
 import rateLimit from "express-rate-limit";
 import { NextApiHandler } from "next";
+import type { Request as ExpressRequest, Response as ExpressResponse } from "express";
 
 // Rate limiter configuration
 const limiter = rateLimit({
@@ -19,7 +20,9 @@ const applyRateLimit = (handler: NextApiHandler) => (
   res: NextApiResponse
 ) => {
   return new Promise<void>((resolve, reject) => {
-    limiter(req as any, res as any, (err: unknown) => {
+    // express-rate-limit expects Express request/response shapes; cast via unknown
+    // to avoid using `any` and satisfy @typescript-eslint/no-explicit-any
+    limiter(req as unknown as ExpressRequest, res as unknown as ExpressResponse, (err: unknown) => {
       if (err) return reject(err);
       Promise.resolve(handler(req, res)).then(() => resolve()).catch(reject);
     });
@@ -56,14 +59,16 @@ function parseBookingDate(dateString: string): Date {
 function convertTo24Hour(time: string): string {
   if (time.includes("AM") || time.includes("PM")) {
     const [timePart, period] = time.trim().split(" ");
-    let [hours, minutes] = timePart.split(":").map(Number);
-    
+    const [hourStr, minuteStr] = timePart.split(":");
+    let hours = Number(hourStr);
+    const minutes = Number(minuteStr);
+
     if (period === "AM" && hours === 12) {
       hours = 0; // 12AM becomes 00
     } else if (period === "PM" && hours < 12) {
       hours += 12; // Convert to 24-hour
     }
-    
+
     return `${hours.toString().padStart(2, "0")}:${minutes
       .toString()
       .padStart(2, "0")}`;
@@ -115,7 +120,7 @@ export default applyRateLimit(async function handler(
       if (isNaN(bookingDate.getTime())) {
         throw new Error("Invalid date");
       }
-    } catch (dateError) {
+  } catch {
       return res.status(400).json({
         error: "Invalid date format",
         details: "Please provide a valid date (YYYY-MM-DD)",
@@ -130,7 +135,7 @@ export default applyRateLimit(async function handler(
       if (!timeRegex.test(formattedTime)) {
         throw new Error("Invalid time format");
       }
-    } catch (timeError) {
+  } catch {
       return res.status(400).json({
         error: "Invalid time format",
         details: "Please provide a valid time in HH:MM format or 12-hour format (e.g., 2:30 PM)",
