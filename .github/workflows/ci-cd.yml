@@ -39,7 +39,7 @@ jobs:
         # doesn't attempt to load JS files that aren't part of the TS project.
         # Allow lint to fail without failing the whole job so CI can proceed while
         # we iteratively fix remaining lint errors.
-        npx eslint "src/**/*.{ts,tsx}" "pages/**/*.{ts,tsx}" "components/**/*.{ts,tsx}" --ext .ts,.tsx || true
+  npx eslint "src/**/*.{ts,tsx}" "pages/**/*.{ts,tsx}" "components/**/*.{ts,tsx}" --ext .ts,.tsx
 
     - name: Cache build output
       uses: actions/cache@v4
